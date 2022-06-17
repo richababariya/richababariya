@@ -1,0 +1,24 @@
+  fonts:
+    - family: DancingScript
+      fonts:
+        - assets: fonts/DancingScript-Bold.ttf
+        - assets: fonts/DancingScript-Regular.ttf
+        - assets: fonts/DancingScript-Medium.ttf
+        - assets: fonts/DancingScript-SemiBold.ttf
+        - assets: fonts/DancingScript-VariableFont_wght.ttf
+          style: italic
+    - family: Quicksand
+      fonts:
+        - assets: fonts/Quicksand-Bold.ttf
+        - assets: fonts/Quicksand-Light.ttf
+        - assets: fonts/Quicksand-Medium.ttf
+        - assets: fonts/Quicksand-Regular.ttf
+        - assets: fonts/Quicksand-SemiBold.ttf
+        - assets: fonts/Quicksand-VariableFont_wght.ttf
+          weight: 400
+
+assets:
+    - assets/images/colors.webp
+    - assets/images/wings.webp
+    - assets/images/blueshade.jpg
+    - assets/images/123.jpg
