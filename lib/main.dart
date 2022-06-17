@@ -64,7 +64,7 @@ class MyAppState extends StatefulWidget {
   State<MyAppState> createState() => _MyAppStateState();
 }
 
-class _MyAppStateState extends State<MyAppState> {
+class _MyAppStateState extends State<MyAppState> with WidgetsBindingObserver {
   final List<Transaction> _userTransaction = [
     // Transaction(
     //   id: 'a1',
@@ -100,6 +100,26 @@ class _MyAppStateState extends State<MyAppState> {
 
   bool _showChart = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+    //WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifeCycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    //WidgetsBinding.instance.removeObserver(this);
+
+    super.dispose();
+  }
+
   List<Transaction> get _recentTransactions {
     return _userTransaction.where(
       (tx) {
@@ -128,7 +148,7 @@ class _MyAppStateState extends State<MyAppState> {
   void _startAddNewTransaction(BuildContext ctx) {
     showModalBottomSheet(
       context: ctx,
-      builder: (_) {
+      builder: (context) {
         return GestureDetector(
           onTap: () {},
           child: NewTransaction(_addNewTransaction),
@@ -146,10 +166,59 @@ class _MyAppStateState extends State<MyAppState> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(
+    AppBar appBar,
+    Widget txListWidget,
+  ) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Show Chart',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Switch.adaptive(
+              value: _showChart,
+              onChanged: (val) {
+                setState(() {
+                  _showChart = val;
+                });
+              })
+        ],
+      ),
+      _showChart
+          ? SizedBox(
+              height: (MediaQuery.of(context).size.height -
+                      appBar.preferredSize.height -
+                      MediaQuery.of(context).padding.top) *
+                  0.7,
+              child: Chart(_recentTransactions),
+            )
+          : txListWidget,
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(
+    AppBar appBar,
+    Widget txListWidget,
+  ) {
+    return [
+      SizedBox(
+        height: (MediaQuery.of(context).size.height -
+                appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top) *
+            0.35,
+        child: Chart(_recentTransactions),
+      ),
+      txListWidget
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build() MyAppStateState');
-    //final mediaQuery = MediaQuery.of(context);
+    final mediaQuery = MediaQuery.of(context);
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     // final PreferredSizeWidget appBar =  Platform.isIOS
@@ -221,42 +290,8 @@ class _MyAppStateState extends State<MyAppState> {
           //mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (isLandscape)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Show Chart',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Switch.adaptive(
-                      value: _showChart,
-                      onChanged: (val) {
-                        setState(() {
-                          _showChart = val;
-                        });
-                      })
-                ],
-              ),
-            if (!isLandscape)
-              SizedBox(
-                height: (MediaQuery.of(context).size.height -
-                        appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.35,
-                child: Chart(_recentTransactions),
-              ),
-            if (!isLandscape) txListWidget,
-            if (isLandscape)
-              _showChart
-                  ? SizedBox(
-                      height: (MediaQuery.of(context).size.height -
-                              appBar.preferredSize.height -
-                              MediaQuery.of(context).padding.top) *
-                          0.7,
-                      child: Chart(_recentTransactions),
-                    )
-                  : txListWidget,
+            if (isLandscape) ..._buildLandscapeContent(appBar, txListWidget),
+            if (!isLandscape) ..._buildPortraitContent(appBar, txListWidget),
           ],
         ),
       ),
